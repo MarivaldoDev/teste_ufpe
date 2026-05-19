@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify
 from datetime import datetime
 
-from ..extensions import db
-from ..models.lesson_plan import LessonPlan
-from ..app.schemas.lesson_plan_schema import LessonPlanSchema
-from ..services.ai_service import generate_lesson_recommendations
+from extensions import db
+from models.lesson_plan import LessonPlan
+from app.schemas.lesson_plan_schema import LessonPlanSchema
+from services.ai_service import generate_lesson_recommendations
+from app.logger import logger
+import time
 
 
 lesson_plan_bp = Blueprint("lesson_plan", __name__)
@@ -43,6 +45,8 @@ def create_lesson_plan():
 
     db.session.add(lesson_plan)
     db.session.commit()
+
+    logger.info(f'Lesson Plan Created: Title="{lesson_plan.title}", Discipline="{lesson_plan.discipline}"')
 
     return jsonify(lesson_plan_schema.dump(lesson_plan)), 201
 
@@ -135,6 +139,8 @@ def update_lesson_plan(plan_id):
 
     db.session.commit()
 
+    logger.info(f'Lesson Plan Updated: ID={lesson_plan.id}, Title="{lesson_plan.title}"')
+
     return jsonify(lesson_plan_schema.dump(lesson_plan))
 
 
@@ -146,6 +152,8 @@ def delete_lesson_plan(plan_id):
     db.session.delete(lesson_plan)
     db.session.commit()
 
+    logger.info(   f'Lesson Plan Deleted: ID={lesson_plan.id}')
+
     return jsonify({
         "message": "Lesson plan deleted successfully"
     })
@@ -156,6 +164,7 @@ def delete_lesson_plan(plan_id):
     methods=["POST"]
 )
 def ai_recommendations():
+    start_time = time.time()
     data = request.get_json()
 
     title = data.get("title")
@@ -179,9 +188,24 @@ def ai_recommendations():
             )
         )
 
+        latency = round(time.time() - start_time, 2)
+        token_usage = len(f"{title} {discipline} {summary}".split())
+
+        logger.info(
+            f'AI Request: '
+            f'Title="{title}", '
+            f'Discipline="{discipline}", '
+            f'TokenUsage={token_usage}, '
+            f'Latency={latency}s'
+        )
+
         return jsonify(recommendations)
 
     except Exception as e:
+        logger.error(
+            f"AI Recommendation Error: {str(e)}"
+        )
+
         return jsonify({
             "error": str(e)
         }), 500
