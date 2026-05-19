@@ -12,10 +12,12 @@ import CreateLesson from "./pages/CreateLesson";
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-gray-100">
+      <div className="app-shell min-h-screen">
+        <div className="app-glow app-glow-one" />
+        <div className="app-glow app-glow-two" />
         <Navbar />
 
-        <div className="max-w-6xl mx-auto p-6">
+        <main className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-12 pt-8 md:px-8 md:pt-10">
           <Routes>
             <Route
               path="/"
@@ -32,8 +34,8 @@ function App() {
               element={<CreateLesson />}
             />
           </Routes>
-          
-        </div>
+
+        </main>
       </div>
     </BrowserRouter>
   );

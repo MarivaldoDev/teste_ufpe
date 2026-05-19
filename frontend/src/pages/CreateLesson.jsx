@@ -44,28 +44,6 @@ function CreateLesson() {
     });
   }
 
-  async function loadLessonPlan() {
-    try {
-      const response = await api.get(
-        `/plans/${id}`
-      );
-
-      setFormData({
-        ...response.data,
-        expected_date:
-          response.data.expected_date || "",
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  useEffect(() => {
-    if (isEditing) {
-      loadLessonPlan();
-    }
-  }, []);
-
   async function handleGenerateAI() {
     try {
       setLoadingAI(true);
@@ -90,7 +68,7 @@ function CreateLesson() {
     } catch (error) {
       console.error(error);
 
-      toast.error("Error generating AI recommendations");
+      toast.error("Erro ao gerar recomendacoes com IA");
     } finally {
       setLoadingAI(false);
     }
@@ -134,7 +112,7 @@ function CreateLesson() {
     if (isEditing) {
       loadLessonPlan();
     }
-  }, []);
+  }, [isEditing]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -149,7 +127,7 @@ function CreateLesson() {
         );
 
        toast.success(
-        "Lesson updated successfully!"
+        "Aula atualizada com sucesso!"
       );
       } else {
         await api.post(
@@ -158,7 +136,7 @@ function CreateLesson() {
         );
 
         toast.success(
-          "Lesson created successfully!"
+          "Aula criada com sucesso!"
         );
       }
 
@@ -166,26 +144,28 @@ function CreateLesson() {
     } catch (error) {
       console.error(error);
 
-      toast.error("Error saving lesson");
+      toast.error("Erro ao salvar aula");
     } finally {
       setLoadingSubmit(false);
     }
   }
 
   return (
-    
-    <div className="bg-white rounded-xl shadow-md p-6 mb-8">
+    <div className="rounded-3xl border border-white/60 bg-white/85 p-6 shadow-xl shadow-slate-300/30 backdrop-blur-xl md:p-8">
      <div className="mb-8">
-        <h1 className="text-4xl font-bold">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-orange-700">
+          Construtor de Aulas
+        </p>
+        <h1 className="font-display text-4xl leading-tight text-slate-900 md:text-5xl">
             {
               isEditing
-                ? "Edit Lesson Plan"
-                : "Create Lesson Plan"
+                ? "Editar Plano de Aula"
+                : "Criar Plano de Aula"
             }
         </h1>
 
-        <p className="text-gray-500 mt-2">
-            Use AI to generate educational recommendations
+        <p className="mt-2 max-w-2xl text-slate-600">
+            Monte planos de aula completos e use recomendacoes com IA para acelerar o planejamento.
         </p>
     </div>
 
@@ -193,97 +173,123 @@ function CreateLesson() {
         onSubmit={handleSubmit}
         className="space-y-4"
       >
-        <input
-          type="text"
-          name="title"
-          placeholder="Lesson title"
-          value={formData.title}
-          onChange={handleChange}
-          className="w-full border rounded-lg p-3"
-        />
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className="form-field md:col-span-2">
+            <span>Titulo da aula</span>
+            <input
+              type="text"
+              name="title"
+              placeholder="Ex: Fundamentos de Energia Renovavel"
+              value={formData.title}
+              onChange={handleChange}
+              className="input-base"
+            />
+          </label>
 
-        <input
-          type="text"
-          name="discipline"
-          placeholder="Discipline"
-          value={formData.discipline}
-          onChange={handleChange}
-          className="w-full border rounded-lg p-3"
-        />
+          <label className="form-field">
+            <span>Disciplina</span>
+            <input
+              type="text"
+              name="discipline"
+              placeholder="Ex: Ciencias"
+              value={formData.discipline}
+              onChange={handleChange}
+              className="input-base"
+            />
+          </label>
 
-        <textarea
-          name="summary"
-          placeholder="Summary"
-          value={formData.summary}
-          onChange={handleChange}
-          className="w-full border rounded-lg p-3 h-24"
-        />
+          <label className="form-field">
+            <span>Data prevista</span>
+            <input
+              type="date"
+              name="expected_date"
+              value={formData.expected_date}
+              onChange={handleChange}
+              className="input-base"
+            />
+          </label>
 
-        <textarea
-          name="objective"
-          placeholder="Objective"
-          value={formData.objective}
-          onChange={handleChange}
-          className="w-full border rounded-lg p-3 h-24"
-        />
+          <label className="form-field md:col-span-2">
+            <span>Resumo</span>
+            <textarea
+              name="summary"
+              placeholder="Descreva brevemente o que esta aula aborda"
+              value={formData.summary}
+              onChange={handleChange}
+              className="input-base min-h-28"
+            />
+          </label>
 
-        <textarea
-          name="contents"
-          placeholder="Contents"
-          value={formData.contents}
-          onChange={handleChange}
-          className="w-full border rounded-lg p-3 h-24"
-        />
+          <label className="form-field md:col-span-2">
+            <span>Objetivo</span>
+            <textarea
+              name="objective"
+              placeholder="Descreva os resultados de aprendizagem"
+              value={formData.objective}
+              onChange={handleChange}
+              className="input-base min-h-28"
+            />
+          </label>
 
-        <input
-          type="text"
-          name="support_resources"
-          placeholder="Support resources"
-          value={formData.support_resources}
-          onChange={handleChange}
-          className="w-full border rounded-lg p-3"
-        />
+          <label className="form-field md:col-span-2">
+            <span>Conteudos</span>
+            <textarea
+              name="contents"
+              placeholder="Topicos, atividades e sequencia"
+              value={formData.contents}
+              onChange={handleChange}
+              className="input-base min-h-28"
+            />
+          </label>
 
-        <input
-          type="text"
-          name="tags"
-          placeholder="Tags"
-          value={formData.tags}
-          onChange={handleChange}
-          className="w-full border rounded-lg p-3"
-        />
+          <label className="form-field">
+            <span>Recursos de apoio</span>
+            <input
+              type="text"
+              name="support_resources"
+              placeholder="Livros, sites e ferramentas"
+              value={formData.support_resources}
+              onChange={handleChange}
+              className="input-base"
+            />
+          </label>
 
-        <input
-          type="date"
-          name="expected_date"
-          value={formData.expected_date}
-          onChange={handleChange}
-          className="w-full border rounded-lg p-3"
-        />
+          <label className="form-field">
+            <span>Tags</span>
+            <input
+              type="text"
+              name="tags"
+              placeholder="projeto, trabalho em equipe, avaliacao"
+              value={formData.tags}
+              onChange={handleChange}
+              className="input-base"
+            />
+          </label>
+        </div>
 
-        <div className="flex gap-4">
+        <div className="mt-4 flex flex-wrap gap-3">
           <button
             type="button"
             onClick={handleGenerateAI}
             disabled={loadingAI}
-            className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 text-white px-5 py-3 rounded-lg transition"
+            className="btn-primary"
           >
             {loadingAI
-              ? "Generating AI Suggestions..."
-              : "Generate with AI"}
+              ? "Gerando sugestoes com IA..."
+              : "Gerar com IA"}
           </button>
 
           <button
             type="submit"
             disabled={loadingSubmit}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white px-5 py-3 rounded-lg transition"
+            className="btn-accent"
           >
             {
               loadingSubmit
-                ? "Saving Lesson..."
+                ? "Salvando aula..."
                 : isEditing
-                ? "Update Lesson"
-                : "Save Lesson Plan"
+                ? "Atualizar Aula"
+                : "Salvar Plano de Aula"
             }
           </button>
         </div>

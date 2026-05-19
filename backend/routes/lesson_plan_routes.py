@@ -58,6 +58,7 @@ def get_lesson_plans():
     title = request.args.get("title")
     discipline = request.args.get("discipline")
     tags = request.args.get("tags")
+    expected_date = request.args.get("expected_date")
 
     if title:
         query = query.filter(LessonPlan.title.ilike(f"%{title}%"))
@@ -67,6 +68,13 @@ def get_lesson_plans():
 
     if tags:
         query = query.filter(LessonPlan.tags.ilike(f"%{tags}%"))
+
+    if expected_date:
+        try:
+            parsed_expected_date = datetime.strptime(expected_date, "%Y-%m-%d").date()
+            query = query.filter(LessonPlan.expected_date == parsed_expected_date)
+        except ValueError:
+            return jsonify({"error": "expected_date must be in YYYY-MM-DD format"}), 400
 
     # ordenação
     order_by = request.args.get("order_by", "created_at")
