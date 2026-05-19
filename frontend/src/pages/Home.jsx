@@ -3,11 +3,21 @@ import {
   useState,
 } from "react";
 
+import { toast } from "sonner";
+
+import LessonCardSkeleton from "../components/LessonCardSkeleton";
+
 import api from "../services/api";
 
 import LessonCard from "../components/LessonCard";
 
 function Home() {  
+  const [search, setSearch] = useState("");
+
+  const [discipline, setDiscipline] = useState("");
+
+  const [orderBy, setOrderBy] = useState("created_at");
+
   const [plans, setPlans] = useState([]);
 
   const [page, setPage] = useState(1);
@@ -21,8 +31,8 @@ function Home() {
   async function loadPlans() {
     try {
       const response = await api.get(
-        `/plans?page=${page}&per_page=5`
-    );
+        `/plans?page=${page}&per_page=5&title=${search}&discipline=${discipline}&order_by=${orderBy}`
+      );
 
       setPlans(response.data.items);
       setTotalPages(response.data.pages);
@@ -44,24 +54,36 @@ function Home() {
 
   try {
     await api.delete(`/plans/${id}`);
-
+    toast.success("Lesson plan deleted successfully!");
     loadPlans();
   } catch (error) {
     console.error(error);
+    toast.error("Error deleting lesson plan");
   }
 }
 
   useEffect(() => {
     loadPlans();
-  }, [page]);
+  }, [
+    page,
+    search,
+    discipline,
+    orderBy,
+  ]);
 
   if (loading) {
-  return (
-    <div className="flex justify-center py-20">
-      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-    </div>
-  );
-}
+    return (
+      <div className="grid gap-6">
+        {Array.from({ length: 5 }).map(
+          (_, index) => (
+            <LessonCardSkeleton
+              key={index}
+            />
+          )
+        )}
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -76,6 +98,50 @@ function Home() {
           </p>
         </div>
       </div>
+
+      <div className="bg-white rounded-2xl shadow-md p-4 mt-6">
+      <div className="grid md:grid-cols-3 gap-4">
+        <input
+          type="text"
+          placeholder="Search by title..."
+          value={search}
+          onChange={(e) =>
+            setSearch(e.target.value)
+          }
+          className="border rounded-lg p-3"
+        />
+
+        <input
+          type="text"
+          placeholder="Filter by discipline..."
+          value={discipline}
+          onChange={(e) =>
+            setDiscipline(e.target.value)
+          }
+          className="border rounded-lg p-3"
+        />
+
+        <select
+          value={orderBy}
+          onChange={(e) =>
+            setOrderBy(e.target.value)
+          }
+          className="border rounded-lg p-3"
+        >
+          <option value="created_at">
+            Latest
+          </option>
+
+          <option value="title">
+            Title
+          </option>
+
+          <option value="discipline">
+            Discipline
+          </option>
+        </select>
+      </div>
+    </div>
 
     {plans.length === 0 && (
         <div className="bg-white rounded-2xl shadow-md p-12 text-center">

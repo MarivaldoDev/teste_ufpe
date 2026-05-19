@@ -8,6 +8,8 @@ import {
   useParams,
 } from "react-router-dom";
 
+import { toast } from "sonner";
+
 import api from "../services/api";
 
 function CreateLesson() {
@@ -88,9 +90,7 @@ function CreateLesson() {
     } catch (error) {
       console.error(error);
 
-      alert(
-        "Error generating AI recommendations"
-      );
+      toast.error("Error generating AI recommendations");
     } finally {
       setLoadingAI(false);
     }
@@ -148,21 +148,25 @@ function CreateLesson() {
           formData
         );
 
-        alert("Lesson updated!");
+       toast.success(
+        "Lesson updated successfully!"
+      );
       } else {
         await api.post(
           "/plans",
           formData
         );
 
-        alert("Lesson created!");
+        toast.success(
+          "Lesson created successfully!"
+        );
       }
 
       navigate("/");
     } catch (error) {
       console.error(error);
 
-      alert("Error saving lesson");
+      toast.error("Error saving lesson");
     } finally {
       setLoadingSubmit(false);
     }
