@@ -1,11 +1,10 @@
+from extensions import db, migrate
 from flask import Flask
 from flask_cors import CORS
+from routes.lesson_plan_routes import lesson_plan_bp
 
 from .config import Config
-from extensions import db, migrate
 
-from models import LessonPlan
-from routes.lesson_plan_routes import lesson_plan_bp
 
 def create_app():
     app = Flask(__name__)

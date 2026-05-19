@@ -1,13 +1,12 @@
-from flask import Blueprint, request, jsonify
+import time
 from datetime import datetime
 
-from extensions import db
-from models.lesson_plan import LessonPlan
-from app.schemas.lesson_plan_schema import LessonPlanSchema
-from services.ai_service import generate_lesson_recommendations
 from app.logger import logger
-import time
-
+from app.schemas.lesson_plan_schema import LessonPlanSchema
+from extensions import db
+from flask import Blueprint, jsonify, request
+from models.lesson_plan import LessonPlan
+from services.ai_service import generate_lesson_recommendations
 
 lesson_plan_bp = Blueprint("lesson_plan", __name__)
 
@@ -34,10 +33,7 @@ def create_lesson_plan():
         support_resources=data.get("support_resources"),
         tags=data.get("tags"),
         expected_date=(
-            datetime.strptime(
-                data["expected_date"],
-                "%Y-%m-%d"
-            ).date()
+            datetime.strptime(data["expected_date"], "%Y-%m-%d").date()
             if data.get("expected_date")
             else None
         ),
@@ -46,7 +42,9 @@ def create_lesson_plan():
     db.session.add(lesson_plan)
     db.session.commit()
 
-    logger.info(f'Lesson Plan Created: Title="{lesson_plan.title}", Discipline="{lesson_plan.discipline}"')
+    logger.info(
+        f'Lesson Plan Created: Title="{lesson_plan.title}", Discipline="{lesson_plan.discipline}"'
+    )
 
     return jsonify(lesson_plan_schema.dump(lesson_plan)), 201
 
@@ -65,14 +63,10 @@ def get_lesson_plans():
         query = query.filter(LessonPlan.title.ilike(f"%{title}%"))
 
     if discipline:
-        query = query.filter(
-            LessonPlan.discipline.ilike(f"%{discipline}%")
-        )
+        query = query.filter(LessonPlan.discipline.ilike(f"%{discipline}%"))
 
     if tags:
-        query = query.filter(
-            LessonPlan.tags.ilike(f"%{tags}%")
-        )
+        query = query.filter(LessonPlan.tags.ilike(f"%{tags}%"))
 
     # ordenação
     order_by = request.args.get("order_by", "created_at")
@@ -87,18 +81,16 @@ def get_lesson_plans():
 
     per_page = request.args.get("per_page", 10, type=int)
 
-    pagination = query.paginate(
-        page=page,
-        per_page=per_page,
-        error_out=False
-    )
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
-    return jsonify({
-        "items": lesson_plans_schema.dump(pagination.items),
-        "total": pagination.total,
-        "page": pagination.page,
-        "pages": pagination.pages,
-    })
+    return jsonify(
+        {
+            "items": lesson_plans_schema.dump(pagination.items),
+            "total": pagination.total,
+            "page": pagination.page,
+            "pages": pagination.pages,
+        }
+    )
 
 
 # GET BY ID
@@ -129,17 +121,16 @@ def update_lesson_plan(plan_id):
     lesson_plan.support_resources = data.get("support_resources")
     lesson_plan.tags = data.get("tags")
     lesson_plan.expected_date = (
-        datetime.strptime(
-            data["expected_date"],
-            "%Y-%m-%d"
-        ).date()
+        datetime.strptime(data["expected_date"], "%Y-%m-%d").date()
         if data.get("expected_date")
         else None
     )
 
     db.session.commit()
 
-    logger.info(f'Lesson Plan Updated: ID={lesson_plan.id}, Title="{lesson_plan.title}"')
+    logger.info(
+        f'Lesson Plan Updated: ID={lesson_plan.id}, Title="{lesson_plan.title}"'
+    )
 
     return jsonify(lesson_plan_schema.dump(lesson_plan))
 
@@ -152,17 +143,12 @@ def delete_lesson_plan(plan_id):
     db.session.delete(lesson_plan)
     db.session.commit()
 
-    logger.info(   f'Lesson Plan Deleted: ID={lesson_plan.id}')
+    logger.info(f"Lesson Plan Deleted: ID={lesson_plan.id}")
 
-    return jsonify({
-        "message": "Lesson plan deleted successfully"
-    })
+    return jsonify({"message": "Lesson plan deleted successfully"})
 
 
-@lesson_plan_bp.route(
-    "/ai/recommendations",
-    methods=["POST"]
-)
+@lesson_plan_bp.route("/ai/recommendations", methods=["POST"])
 def ai_recommendations():
     start_time = time.time()
     data = request.get_json()
@@ -172,40 +158,32 @@ def ai_recommendations():
     summary = data.get("summary")
 
     if not all([title, discipline, summary]):
-        return jsonify({
-            "error": (
-                "title, discipline "
-                "and summary are required"
-            )
-        }), 400
+        return (
+            jsonify({"error": ("title, discipline and summary are required")}),
+            400,
+        )
 
     try:
-        recommendations = (
-            generate_lesson_recommendations(
-                title,
-                discipline,
-                summary,
-            )
+        recommendations = generate_lesson_recommendations(
+            title,
+            discipline,
+            summary,
         )
 
         latency = round(time.time() - start_time, 2)
         token_usage = len(f"{title} {discipline} {summary}".split())
 
         logger.info(
-            f'AI Request: '
+            f"AI Request: "
             f'Title="{title}", '
             f'Discipline="{discipline}", '
-            f'TokenUsage={token_usage}, '
-            f'Latency={latency}s'
+            f"TokenUsage={token_usage}, "
+            f"Latency={latency}s"
         )
 
         return jsonify(recommendations)
 
     except Exception as e:
-        logger.error(
-            f"AI Recommendation Error: {str(e)}"
-        )
+        logger.error(f"AI Recommendation Error: {str(e)}")
 
-        return jsonify({
-            "error": str(e)
-        }), 500
+        return jsonify({"error": str(e)}), 500

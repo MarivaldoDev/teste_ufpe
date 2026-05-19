@@ -1,7 +1,7 @@
 import json
 
-from openai import OpenAI
 from flask import current_app
+from openai import OpenAI
 
 
 def generate_lesson_recommendations(
@@ -9,14 +9,9 @@ def generate_lesson_recommendations(
     discipline,
     summary,
 ):
-    api_key = current_app.config.get(
-        "GROQ_API_KEY"
-    )
+    api_key = current_app.config.get("GROQ_API_KEY")
 
-    client = OpenAI(
-        api_key=api_key,
-        base_url="https://api.groq.com/openai/v1"
-    )
+    client = OpenAI(api_key=api_key, base_url="https://api.groq.com/openai/v1")
 
     prompt = f"""
     Você é um assistente pedagógico.
@@ -43,25 +38,12 @@ def generate_lesson_recommendations(
 
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
-        messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
+        messages=[{"role": "user", "content": prompt}],
         temperature=0.7,
     )
 
-    content = (
-        response.choices[0]
-        .message.content
-    )
+    content = response.choices[0].message.content
 
-    content = (
-        content
-        .replace("```json", "")
-        .replace("```", "")
-        .strip()
-    )
+    content = content.replace("```json", "").replace("```", "").strip()
 
     return json.loads(content)
