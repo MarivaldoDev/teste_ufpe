@@ -1,40 +1,42 @@
 # Smart Lesson Planner
 
-Uma aplicação full stack moderna para criação, gerenciamento e organização de planos de aula com recomendações geradas por IA.
+Uma aplicação full stack para criar, organizar e gerenciar planos de aula com recomendações geradas por IA.
 
-Desenvolvida com Flask, React, Tailwind CSS e Groq AI.
-
----
-
-# Funcionalidades
-
-## Backend
-- API REST com Flask
-- ORM com SQLAlchemy
-- Banco de dados SQLite
-- Operações CRUD
-- Paginação
-- Filtros
-- Ordenação
-- Endpoint de recomendações com IA
-- CORS configurado
-
-## Frontend
-- SPA com React + Vite
-- Interface moderna com Tailwind CSS
-- Layout responsivo
-- Busca e filtros
-- Paginação
-- Criação/Edição/Exclusão de planos de aula
-- Sugestões geradas por IA
-- Toast notifications
-- Skeleton loading
+O projeto foi desenvolvido em Flask + React e estruturado para execução local com Docker, conforme o desafio de manutenção de software.
 
 ---
 
-# Tecnologias Utilizadas
+## Visão Geral
 
-## Backend
+A aplicação permite:
+
+- criar, editar, listar e excluir planos de aula
+- filtrar por título, disciplina, data e tags
+- ordenar a listagem por data ou título
+- gerar recomendações com IA a partir de título, disciplina e resumo
+- acompanhar a saúde da API por meio de endpoint dedicado
+
+---
+
+## Requisitos Atendidos
+
+O projeto foi preparado para atender aos pontos principais do desafio:
+
+- uso de Docker e Docker Compose para execução local
+- API REST com CRUD completo
+- banco SQLite
+- filtros e paginação
+- integração com IA para recomendações
+- logs de observabilidade no backend
+- endpoint `/health`
+- frontend em React com interface responsiva
+
+---
+
+## Tecnologias
+
+### Backend
+
 - Python
 - Flask
 - Flask SQLAlchemy
@@ -42,7 +44,8 @@ Desenvolvida com Flask, React, Tailwind CSS e Groq AI.
 - SQLite
 - Groq API
 
-## Frontend
+### Frontend
+
 - React
 - Vite
 - Tailwind CSS
@@ -52,201 +55,185 @@ Desenvolvida com Flask, React, Tailwind CSS e Groq AI.
 
 ---
 
-# Estrutura do Projeto
+## Estrutura do Projeto
 
 ```bash
 project/
-│
 ├── backend/
 │   ├── app/
 │   ├── migrations/
 │   ├── run.py
-│   ├── requirements.txt
-│   └── .env
-│
+│   ├── Dockerfile
+│   └── requirements.txt
 ├── frontend/
 │   ├── src/
+│   ├── Dockerfile
 │   ├── package.json
 │   └── vite.config.js
-│
+├── docker-compose.yml
 └── README.md
 ```
 
 ---
 
-# Como Rodar o Backend
+## Execução com Docker
 
-## 1. Acesse a pasta backend
+Esta é a forma recomendada de rodar o projeto.
 
-```bash
-cd backend
-```
+### 1. Crie o arquivo `.env` na raiz do projeto
 
----
-
-## 2. Crie um ambiente virtual
-
-### Windows
-
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
-
-### Linux/Mac
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
----
-
-## 3. Instale as dependências
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-## 4. Configure as variáveis de ambiente
-
-Crie um arquivo `.env`:
+O `docker-compose.yml` carrega as variáveis de ambiente a partir da raiz do repositório.
 
 ```env
 SECRET_KEY=sua_secret_key
-
 DATABASE_URL=sqlite:///lesson_plans.db
-
 GROQ_API_KEY=sua_chave_groq
 ```
 
----
-
-## 5. Execute as migrations
+### 2. Suba os containers
 
 ```bash
-flask db init
-flask db migrate
-flask db upgrade
+docker compose up --build
+```
+
+Se o seu ambiente usar a sintaxe antiga, também funciona:
+
+```bash
+docker-compose up --build
+```
+
+### 3. Acesse a aplicação
+
+- Frontend: http://localhost:5173
+- Backend: http://127.0.0.1:5000
+- Health check: http://127.0.0.1:5000/health
+
+### 4. Encerrar a execução
+
+```bash
+docker compose down
 ```
 
 ---
 
-## 6. Inicie o servidor backend
+## O Que O Docker Sobe
+
+O `docker-compose.yml` sobe dois serviços:
+
+- `backend`: Flask com migrações aplicadas automaticamente no start
+- `frontend`: Vite em modo desenvolvimento com hot reload
+
+### Portas expostas
+
+- `5000` para a API
+- `5173` para o frontend
+
+### Volumes
+
+- o backend monta `./backend:/app`
+- o frontend monta `./frontend:/app` e preserva `node_modules`
+
+---
+
+## Execução Local Sem Docker
+
+Se quiser rodar sem Docker, o fluxo é este:
+
+### Backend
 
 ```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 python run.py
 ```
 
-O backend ficará disponível em:
-
-```txt
-http://127.0.0.1:5000
-```
-
----
-
-# Como Rodar o Frontend
-
-## 1. Acesse a pasta frontend
+### Frontend
 
 ```bash
 cd frontend
-```
-
----
-
-## 2. Instale as dependências
-
-```bash
 npm install
-```
-
----
-
-## 3. Inicie o frontend
-
-```bash
 npm run dev
 ```
 
-O frontend ficará disponível em:
+---
 
-```txt
-http://localhost:5173
-```
+## Variáveis de Ambiente
+
+| Variável | Descrição |
+|---|---|
+| `SECRET_KEY` | Chave secreta do Flask |
+| `DATABASE_URL` | URL do banco de dados |
+| `GROQ_API_KEY` | Chave da API da Groq |
 
 ---
 
-# Endpoints da API
+## Endpoints da API
 
-## Health Check
+### Health Check
 
 ```http
 GET /health
 ```
 
----
+Resposta esperada:
 
-## Listar Planos de Aula
+```json
+{
+  "status": "ok"
+}
+```
+
+### Listar Planos de Aula
 
 ```http
 GET /plans
 ```
 
-### Query Params
+#### Query params
 
 | Parâmetro | Descrição |
 |---|---|
-| page | Página atual |
-| per_page | Itens por página |
-| title | Busca por título |
-| discipline | Filtro por disciplina |
-| order_by | Campo de ordenação |
+| `page` | Página atual |
+| `per_page` | Itens por página |
+| `title` | Busca por título |
+| `discipline` | Filtro por disciplina |
+| `tags` | Filtro por tags |
+| `expected_date` | Filtro por data |
+| `order_by` | Ordenação por `created_at` ou `title` |
 
----
-
-## Criar Plano de Aula
+### Criar Plano de Aula
 
 ```http
 POST /plans
 ```
 
----
-
-## Buscar Plano de Aula
+### Buscar Plano de Aula
 
 ```http
 GET /plans/:id
 ```
 
----
-
-## Atualizar Plano de Aula
+### Atualizar Plano de Aula
 
 ```http
 PUT /plans/:id
 ```
 
----
-
-## Deletar Plano de Aula
+### Excluir Plano de Aula
 
 ```http
 DELETE /plans/:id
 ```
 
----
-
-## Recomendações com IA
+### Recomendações com IA
 
 ```http
 POST /ai/recommendations
 ```
 
-### Exemplo de Body
+Exemplo de corpo da requisição:
 
 ```json
 {
@@ -258,49 +245,75 @@ POST /ai/recommendations
 
 ---
 
-# Integração com IA
+## Como Funciona a IA
 
-A aplicação utiliza Groq AI para gerar:
+Quando o usuário clica em **Gerar com IA**, o frontend envia:
+
+- título
+- disciplina
+- resumo
+
+O backend chama o modelo configurado na Groq e retorna:
+
 - conteúdos recomendados
-- tópicos relacionados
-- tags educacionais
+- tópicos complementares
+- tags sugeridas
 
-Modelo utilizado:
+Esses dados são usados para preencher automaticamente o formulário.
 
-```txt
-llama-3.3-70b-versatile
+---
+
+## Observabilidade
+
+O backend registra eventos importantes no log, incluindo chamadas de IA com informações como:
+
+- título
+- disciplina
+- uso estimado de tokens
+- latência da requisição
+
+Isso ajuda na análise de desempenho e no acompanhamento de uso.
+
+---
+
+## Scripts do Frontend
+
+```bash
+npm run dev
+npm run build
+npm run lint
+npm run preview
 ```
 
 ---
 
-# Screenshots
+## Prints da Aplicação
 
-## Página Inicial
-Adicione screenshot aqui
+Adicione aqui os screenshots finais da interface.
 
----
+### Página inicial
 
-## Criação de Plano
-Adicione screenshot aqui
+![Página inicial](./docs/screenshots/home.png)
 
----
+### Criação de plano de aula
 
-## Recomendações com IA
-Adicione screenshot aqui
+![Criação de plano de aula](./docs/screenshots/create-lesson.png)
 
----
+### Listagem com filtros
 
-# Melhorias Futuras
-
-- Autenticação
-- Controle de usuários
-- Exportação para PDF
-- Dark mode
-- Testes automatizados
-- Pipeline de deploy
+![Listagem com filtros](./docs/screenshots/filters.png)
 
 ---
 
-# Autor
+## Vídeo de Demonstração
+
+Adicione aqui o link do vídeo final de apresentação do projeto.
+
+- Link do vídeo: https://
+- Duração sugerida: até 5 minutos
+
+---
+
+## Autor
 
 Desenvolvido por Marivaldo Dev
