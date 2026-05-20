@@ -10,6 +10,7 @@ import LessonCardSkeleton from "../components/LessonCardSkeleton";
 import api from "../services/api";
 
 import LessonCard from "../components/LessonCard";
+import ConfirmModal from "../components/ConfirmModal";
 
 function Home() {  
   const [search, setSearch] = useState("");
@@ -29,6 +30,9 @@ function Home() {
 
   const [loading, setLoading] =
     useState(true);
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
 
   async function loadPlans() {
     try {
@@ -57,24 +61,25 @@ function Home() {
     }
   }
 
-  async function handleDelete(id) {
-  const confirmed = window.confirm(
-    "Tem certeza de que deseja excluir este plano de aula?"
-  );
-
-  if (!confirmed) {
-    return;
+  function requestDelete(plan) {
+    setSelectedPlan(plan);
+    setConfirmOpen(true);
   }
 
-  try {
-    await api.delete(`/plans/${id}`);
-    toast.success("Plano de aula excluido com sucesso!");
-    loadPlans();
-  } catch (error) {
-    console.error(error);
-    toast.error("Erro ao excluir o plano de aula");
+  async function handleDeleteConfirmed() {
+    if (!selectedPlan) return;
+
+    try {
+      await api.delete(`/plans/${selectedPlan.id}`);
+      toast.success("Plano de aula excluído com sucesso!");
+      setConfirmOpen(false);
+      setSelectedPlan(null);
+      loadPlans();
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao excluir o plano de aula");
+    }
   }
-}
 
   useEffect(() => {
     loadPlans();
@@ -192,11 +197,26 @@ function Home() {
             <LessonCard
               key={plan.id}
               plan={plan}
-              onDelete={handleDelete}
+              onRequestDelete={requestDelete}
             />
           ))}
         </section>
       )}
+
+      <ConfirmModal
+        open={confirmOpen}
+        title="Confirmar exclusão"
+        message={
+          selectedPlan
+            ? `Deseja realmente excluir o plano "${selectedPlan.title}"? Essa ação não pode ser desfeita.`
+            : ""
+        }
+        onConfirm={handleDeleteConfirmed}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setSelectedPlan(null);
+        }}
+      />
 
       <div className="flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-white/60 bg-white/80 p-3 shadow-sm backdrop-blur-xl">
         <button

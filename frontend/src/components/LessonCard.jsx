@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 function LessonCard({
   plan,
-  onDelete,
+    onRequestDelete,
 }) {
   return (
     <article className="group rounded-3xl border border-white/60 bg-white/85 p-6 shadow-lg shadow-slate-300/25 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-300/40">
@@ -55,7 +55,7 @@ function LessonCard({
         </Link>
         <button
           onClick={() =>
-            onDelete(plan.id)
+            onRequestDelete && onRequestDelete(plan)
           }
           className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-500"
         >
