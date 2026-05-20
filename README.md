@@ -293,15 +293,15 @@ Adicione aqui os screenshots finais da interface.
 
 ### Página inicial
 
-![Página inicial](./docs/screenshots/home.png)
+<img width="1865" height="915" alt="Image" src="https://github.com/user-attachments/assets/47753f3d-f0a7-4fad-837b-23d4065761fe" />
 
 ### Criação de plano de aula
 
-![Criação de plano de aula](./docs/screenshots/create-lesson.png)
+<img width="1865" height="915" alt="Image" src="https://github.com/user-attachments/assets/e505a8da-3298-4278-9ce8-0f44687bb338" />
 
 ### Listagem com filtros
 
-![Listagem com filtros](./docs/screenshots/filters.png)
+<img width="1865" height="742" alt="Image" src="https://github.com/user-attachments/assets/85056c61-2110-4b29-88bc-445dbfa6f9f9" />
 
 ---
 
