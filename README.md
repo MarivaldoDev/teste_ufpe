@@ -307,13 +307,8 @@ Adicione aqui os screenshots finais da interface.
 
 ## Vídeo de Demonstração
 
-Adicione aqui o link do vídeo final de apresentação do projeto.
-
-- Link do vídeo: https://
-- Duração sugerida: até 5 minutos
-
----
+https://github.com/user-attachments/assets/5c87769a-57c1-4769-ba69-714b5a1c63fc
 
 ## Autor
 
-Desenvolvido por Marivaldo Dev
+Desenvolvido por Marivaldo Pedro
